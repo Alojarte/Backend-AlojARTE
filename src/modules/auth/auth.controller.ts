@@ -39,4 +39,28 @@ export class AuthController {
         const user=await this.authService.profile(sub);
         return user;
     }
+
+    @Post('recovery')
+    async recovery(@Body() body:{email:string}){
+    return await this.authService.recoveryPass(body.email);
+    }
+
+    @Put('recoveryVerified')
+    async recoveryVeried(@Body() user:ActUserDto){
+        return await this.authService.verifyRecoryCode(user);
+    }
+
+    @Put('recoveryPassToken')
+    async recoveryPassToken(@Body() body:{token:string, password:string}){
+        try {
+            if(!body.token){
+                throw new NotFoundException('token no valido');
+            }
+            const {email,sub,rol}=await this.jwtService.verifyAsync(body.token);
+            return await this.authService.verifyTokenRecovery(sub,body.password)
+        } catch (error) {
+            throw error;
+        }
+        
+    }
 }

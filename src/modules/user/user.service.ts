@@ -76,6 +76,10 @@ export class UserService {
         if(!user.verified){
             throw new UnauthorizedException(' aun no se ha verificado la cuenta')
         }
+        if(user.verificationCode.trim()!==""){
+            throw new UnauthorizedException('la cuenta se encuentra suspendida o en proceso de restauracion')
+        }
+
         const isPasswordValid=await bcrypt.compare(password.toString(), user.password);
         if(!isPasswordValid){
             throw new UnauthorizedException('Contraseña incorrecta')
@@ -140,6 +144,8 @@ export class UserService {
                 },
                 relations:['rol','people']
             })
+            console.log('user enviado ');
+            console.log(user);
             if(!userBd){
                 throw new NotFoundException('el usuario no ha sido encontrado')
             }
@@ -165,8 +171,9 @@ export class UserService {
             if(user.act_isVerified !== undefined) {
                 userBd.verified = user.act_isVerified;
             }
+            console.log(user.act_codeVerify)
 
-            if(user.act_codeVerify) {
+            if(user.act_codeVerify || user.act_codeVerify.trim()=='') {
                 userBd.verificationCode = user.act_codeVerify;
             }
 

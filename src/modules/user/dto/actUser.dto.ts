@@ -1,5 +1,6 @@
 
 import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { ActPeopleDto } from "src/modules/people/dto/actPeople.dto";
 import { Rol } from "src/modules/rol/entity/rol.entity";
 
 
@@ -10,7 +11,7 @@ export class ActUserDto{
 
     @IsNotEmpty()
     @IsNumber()
-    act_people:number;
+    act_people:ActPeopleDto;
 
     @IsOptional()
     ac_profilePhoto:string;
