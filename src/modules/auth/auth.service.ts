@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from '../user/user.service';
@@ -64,6 +64,30 @@ export class AuthService {
             throw error;
         }
     }
+    async login(email:string, password:string){
+        try {
+            const user = await this.userService.validateUser(email, password)
 
+
+
+            return await this.generateToken(user);
+        } catch (error) {
+            if(error instanceof UnauthorizedException){
+                throw error;
+            }
+            throw new InternalServerErrorException('error al procesar el login')
+        }
+        
+    }
     
+    async profile(id:number){
+        try {
+            const exists =await this.userService.getUserById(id);
+            return exists;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
 }
