@@ -6,7 +6,7 @@ import { Rol } from "src/modules/rol/entity/rol.entity";
 
 export class ActUserDto{
 
-    @IsNotEmpty()
+    @IsOptional()
     act_Id:number;
 
     @IsNotEmpty()

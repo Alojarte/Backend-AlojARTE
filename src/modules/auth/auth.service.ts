@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { CloudinaryService } from 'src/core/cloudinary/cloudinary.service';
 
 import { UserService } from '../user/user.service';
 import { Repository } from 'typeorm';
@@ -17,11 +18,9 @@ export class AuthService {
 
     constructor(
         private mailService:MailService,
-        
         private jwtService: JwtService,
-        
         private userService: UserService,
-
+        private cloudinaryService: CloudinaryService,
         @InjectRepository(Rol)
         private rolRepository: Repository<Rol>
     ){}
@@ -176,6 +175,56 @@ export class AuthService {
             return result;
         } catch (error) {
             throw error;
+        }
+    }
+
+    async updateProfile(id:number, user:ActUserDto):Promise<any>{
+        try {
+            const res= await this.userService.updateUser(id, user);
+            const token=await this.generateToken(res.user);
+            res.messge='perfil actualizado';
+            
+            return {
+                user:res.user,
+                message:res.messge,
+                token:token
+            };
+        } catch (error) {
+            return new MessageDto(error);
+        }
+    }
+
+    async updateProfilePhoto(id:number, photo:Express.Multer.File):Promise<any>{
+        try {
+            const user = await this.userService.getUserById(id);
+            if(!user) {
+                throw new UnauthorizedException('Usuario no encontrado');
+            }
+
+            if(user.profilePhoto) {
+                const publicId = user.profilePhoto.split('/').pop()?.split('.')[0];
+                if(publicId) {
+                    await this.cloudinaryService.deleteImageProfilePhoto(publicId);
+                }
+            }
+
+
+            const uploadResult = await this.cloudinaryService.uploadImageProfilePhoto(photo);
+            
+            const userDto = new ActUserDto();
+            userDto.ac_profilePhoto = uploadResult.secure_url;
+            
+            const result = await this.userService.updateUser(id, userDto);
+            const token = await this.generateToken(result.user);
+
+            return {
+                user: result.user,
+                message: 'Foto de perfil actualizada exitosamente',
+                token: token
+            };
+
+        } catch (error) {
+            throw new InternalServerErrorException('Error al actualizar la foto de perfil: ' + error.message);
         }
     }
 

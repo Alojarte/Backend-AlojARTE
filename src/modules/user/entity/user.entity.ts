@@ -17,7 +17,7 @@ export class User{
     @ManyToOne(()=>Rol,(rol)=>rol.users)
     rol:Rol;
 
-    @Column({ length: 100, type:'varchar' })
+    @Column({ length: 255, type:'varchar' })
     profilePhoto:string;
 
     @Column({ length: 100, type:'varchar' })

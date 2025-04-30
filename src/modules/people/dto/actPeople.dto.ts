@@ -15,7 +15,7 @@ export class ActPeopleDto{
 
     @IsOptional()
     @IsNumber()
-    act_typeDni:number;
+    act_typeDni: { id: number } | number;
 
     @IsOptional()
     @IsOptional()

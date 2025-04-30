@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
@@ -8,6 +8,7 @@ import * as bcrypt from 'bcryptjs'
 import * as optpGenerator from 'otp-generator'
 import { ConfigService } from '@nestjs/config';
 import { ActUserDto } from './dto/actUser.dto';
+import { ActPeopleDto } from '../people/dto/actPeople.dto';
 
 @Injectable()
 export class UserService {
@@ -144,15 +145,21 @@ export class UserService {
                 },
                 relations:['rol','people']
             })
-            console.log('user enviado ');
-            console.log(user);
             if(!userBd){
                 throw new NotFoundException('el usuario no ha sido encontrado')
             }
 
             if(user.act_email) {
                 const emailSaneado = user.act_email.toLowerCase().trim();
-                userBd.email = emailSaneado;
+                const exists = await this.userRepository.createQueryBuilder('user')
+                    .where('user.email = :email AND user.id != :id', {
+                        email: emailSaneado,
+                        id: id_rec
+                    })
+                    .getCount();
+                if(exists){
+                    throw new NotFoundException('el email ya existe en otro usuario')
+                }
             }
 
             if(user.act_password) {
@@ -171,10 +178,20 @@ export class UserService {
             if(user.act_isVerified !== undefined) {
                 userBd.verified = user.act_isVerified;
             }
-            console.log(user.act_codeVerify)
 
-            if(user.act_codeVerify || user.act_codeVerify.trim()=='') {
+            if(typeof(user.act_codeVerify)!==undefined || user.act_codeVerify.trim()=='') {
                 userBd.verificationCode = user.act_codeVerify;
+            }
+            if(user.act_people && userBd.people.id){
+                const peopleData= new ActPeopleDto();
+                peopleData.act_name=user.act_people.act_name || userBd.people.name;
+                peopleData.act_lastname=user.act_people.act_lastname || userBd.people.lastname;
+                peopleData.act_dni=user.act_people.act_dni || userBd.people.dni;
+                peopleData.act_phone=user.act_people.act_phone || userBd.people.phone;
+                peopleData.act_typeDni=user.act_people.act_typeDni || userBd.people.typeDni;
+                peopleData.act_birthdate=user.act_people.act_birthdate || userBd.people.birthdate;
+                const peopleUpdate= await this.peopleService.updatePeople(userBd.people.id,peopleData);
+                userBd.people=peopleUpdate;
             }
 
             const updatedUser = await this.userRepository.save(userBd);

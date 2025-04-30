@@ -1,8 +1,11 @@
-import { Body, Controller, Get, Headers, NotFoundException, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Headers, NotFoundException, Post, Put, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/createUser.dto';
 import { ActUserDto } from '../user/dto/actUser.dto';
 import { JwtService } from '@nestjs/jwt';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -62,5 +65,25 @@ export class AuthController {
             throw error;
         }
         
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Put('updateProfile')
+    async updateProfile(@Body() user:ActUserDto, @Headers('authorization')authHeader:string){
+        const token=authHeader?.replace('Bearer ','')
+        const {email,sub,rol}=await this.jwtService.verifyAsync(token);
+        return await this.authService.updateProfile(sub,user)
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Put('updateProfilePhoto')
+    @UseInterceptors(FileInterceptor('photo'))
+    async updateProfilePhoto(@UploadedFile() photo: Express.Multer.File, @Headers('authorization')authorization:string){
+        const token = authorization?.replace('Bearer ','');
+        if(!token) {
+            throw new NotFoundException('Token no válido');
+        }
+        const {email,sub,rol} = await this.jwtService.verifyAsync(token);
+        return await this.authService.updateProfilePhoto(sub, photo);
     }
 }
