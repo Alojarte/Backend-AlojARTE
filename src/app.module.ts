@@ -8,6 +8,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TypedniModule } from './modules/typeDni/typedni.module';
 import { CloudinaryModule } from './core/cloudinary/cloudinary.module';
+import { RoomModule } from './modules/room/room.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -32,7 +33,8 @@ import { CloudinaryModule } from './core/cloudinary/cloudinary.module';
   UserModule,
   AuthModule,
   TypedniModule,
-  CloudinaryModule,  
+  CloudinaryModule,
+  RoomModule,  
 ],
   controllers: [AppController],
   providers: [AppService],
