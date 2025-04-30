@@ -1,8 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { People } from './entity/people.entity';
 import { Repository } from 'typeorm';
 import { CreatePeopleDto } from './dto/createPeople.dto';
+import { ActPeopleDto } from './dto/actPeople.dto';
 
 @Injectable()
 export class PeopleService {
@@ -33,5 +34,32 @@ export class PeopleService {
         });
 
         return await this.peopleRepositoy.save(people);
+    }
+
+    async updatePeople(id:number, propel:ActPeopleDto){
+
+        try {
+            const people = await this.peopleRepositoy.findOne({
+                where:{
+                    id:id
+                }
+            });
+            if(!people){
+                throw new NotFoundException('la persona no existe');
+            }
+            const peopleUpdate = Object.assign(people, {
+                name: propel.act_name || people.name,
+                lastname: propel.act_lastname || people.lastname,
+                birthdate: propel.act_birthdate || people.birthdate,
+                typeDni: propel.act_typeDni ? { id: propel.act_typeDni } : people.typeDni,
+                dni: propel.act_dni || people.dni,
+                phone: propel.act_phone || people.phone
+            });
+
+            return await this.peopleRepositoy.save(peopleUpdate);
+
+        } catch (error) {
+            return error;
+        }
     }
 }

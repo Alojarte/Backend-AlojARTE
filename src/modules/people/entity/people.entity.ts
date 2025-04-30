@@ -1,4 +1,4 @@
-import { TypeDni } from "src/modules/typeDNI/entity/typeDni.entity";
+import { TypeDni } from "src/modules/typeDni/entity/typeDni.entity";
 import { User } from "src/modules/user/entity/user.entity";
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 

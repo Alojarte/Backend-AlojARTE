@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER } from './config/constants';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { TypedniModule } from './modules/typeDni/typedni.module';
+import { CloudinaryModule } from './core/cloudinary/cloudinary.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -29,6 +31,8 @@ import { AuthModule } from './modules/auth/auth.module';
   }),
   UserModule,
   AuthModule,
+  TypedniModule,
+  CloudinaryModule,  
 ],
   controllers: [AppController],
   providers: [AppService],

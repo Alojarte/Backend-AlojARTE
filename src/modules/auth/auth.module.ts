@@ -9,6 +9,7 @@ import { Rol } from '../rol/entity/rol.entity';
 import { UserModule } from '../user/user.module';
 import { MailModule } from 'src/core/mail/mail.module';
 import { jwtStrategy } from './strategies/jwt.strategy';
+import { CloudinaryService } from 'src/core/cloudinary/cloudinary.service';
 
 @Module({
   imports:[
@@ -27,6 +28,6 @@ import { jwtStrategy } from './strategies/jwt.strategy';
     TypeOrmModule.forFeature([Rol])
     ,UserModule, MailModule],
   controllers: [AuthController],
-  providers: [AuthService,jwtStrategy]
+  providers: [AuthService,jwtStrategy, CloudinaryService]
 })
 export class AuthModule {}
