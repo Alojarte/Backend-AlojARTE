@@ -12,6 +12,15 @@ export class Room{
 
     @Column({type:'varchar', length:25, nullable:false})
     number:string;
+    
+    @Column({type:'int', nullable:false})
+    price:number;
+
+    @Column({type:'int', nullable:false})
+    capacity:number;
+
+    @Column({type:'enum' , enum:['available','unavailable'], default:'available'})
+    status:string;
 
     @ManyToOne(()=>RoomType,(typeRoom)=>typeRoom.room, {onDelete:'CASCADE', onUpdate:'CASCADE',   })
     typeRoom:RoomType;  
