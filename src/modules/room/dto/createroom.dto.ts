@@ -3,26 +3,26 @@ import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 export class CreateRoomDto{
   @IsString()
   @IsNotEmpty()
-    number:string;
+    c_number:string;
   
     @IsNumber()
     @IsNotEmpty()
-    price:number;
+    c_price:number;
 
     @IsNumber()
     @IsNotEmpty()
-    capacity:number;
+    c_capacity:number;
   
     @IsString()
     @IsNotEmpty()
-    status:string;
+    c_status:string;
 
     @IsNumber()
     @IsNotEmpty()
-    typeRoom:number;  
+    c_typeRoom:number;  
 
     @IsNumber()
     @IsNotEmpty()
-    hotel:number;
+    c_hotel:number;
     
 }

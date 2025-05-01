@@ -9,7 +9,7 @@ export class RoomType{
     @Column({type:'varchar', nullable:false})
     type:string;
 
-    @Column({type:'varchar', nullable:false})
+    @Column({type:'varchar', nullable:true})
     description:string;
 
     @OneToMany(()=>Room,(room)=>room.typeRoom)

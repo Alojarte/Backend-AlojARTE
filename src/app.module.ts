@@ -25,7 +25,7 @@ import { RoomModule } from './modules/room/room.module';
       password: configService.get(DB_PASSWORD),
       database: configService.get(DB_DATABASE),
       entities: [__dirname+'/**/*.entity{.ts,.js}'],
-      synchronize:false,
+      synchronize:true,
       logging:true,
     }),
     inject:[ConfigService]
