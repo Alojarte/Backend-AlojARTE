@@ -221,11 +221,4 @@ export class UserService {
         return user;
     }
 
-    async uploadProfilePhoto(){
-        
-    }
-  
-
-
-
 }
