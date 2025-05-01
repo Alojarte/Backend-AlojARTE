@@ -8,6 +8,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TypedniModule } from './modules/typeDni/typedni.module';
 import { CloudinaryModule } from './core/cloudinary/cloudinary.module';
+import { RoomModule } from './modules/room/room.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -24,7 +25,7 @@ import { CloudinaryModule } from './core/cloudinary/cloudinary.module';
       password: configService.get(DB_PASSWORD),
       database: configService.get(DB_DATABASE),
       entities: [__dirname+'/**/*.entity{.ts,.js}'],
-      synchronize:false,
+      synchronize:true,
       logging:true,
     }),
     inject:[ConfigService]
@@ -32,7 +33,8 @@ import { CloudinaryModule } from './core/cloudinary/cloudinary.module';
   UserModule,
   AuthModule,
   TypedniModule,
-  CloudinaryModule,  
+  CloudinaryModule,
+  RoomModule,  
 ],
   controllers: [AppController],
   providers: [AppService],
