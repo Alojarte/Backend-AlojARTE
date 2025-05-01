@@ -9,6 +9,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TypedniModule } from './modules/typeDni/typedni.module';
 import { CloudinaryModule } from './core/cloudinary/cloudinary.module';
 import { RoomModule } from './modules/room/room.module';
+import { HotelModule } from './modules/hotel/hotel.module';
+import { HotelimageModule } from './modules/hotelImage/hotelimage.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -34,7 +36,9 @@ import { RoomModule } from './modules/room/room.module';
   AuthModule,
   TypedniModule,
   CloudinaryModule,
-  RoomModule,  
+  RoomModule,
+  HotelModule,
+  HotelimageModule,  
 ],
   controllers: [AppController],
   providers: [AppService],

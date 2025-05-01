@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CloudinaryService } from 'src/core/cloudinary/cloudinary.service';
 
@@ -12,6 +12,7 @@ import { MailService } from 'src/core/mail/mailer.service';
 import { ActUserDto } from '../user/dto/actUser.dto';
 import * as optpGenerator from 'otp-generator';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { FOLDER_PROFILE } from 'src/config/constants';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,8 @@ export class AuthService {
         private userService: UserService,
         private cloudinaryService: CloudinaryService,
         @InjectRepository(Rol)
-        private rolRepository: Repository<Rol>
+        private rolRepository: Repository<Rol>,
+        private readonly configService:ConfigService
     ){}
 
     async register(user:CreateUserDto):Promise<MessageDto>{
@@ -196,7 +198,11 @@ export class AuthService {
 
     async updateProfilePhoto(id:number, photo:Express.Multer.File):Promise<any>{
         try {
+            const profileFolder= this.configService.get<string>(FOLDER_PROFILE);
             const user = await this.userService.getUserById(id);
+            if(!profileFolder){
+                throw new NotFoundException('error no se proporciono una carpeta para este metodo')
+            }
             if(!user) {
                 throw new UnauthorizedException('Usuario no encontrado');
             }
@@ -204,12 +210,11 @@ export class AuthService {
             if(user.profilePhoto) {
                 const publicId = user.profilePhoto.split('/').pop()?.split('.')[0];
                 if(publicId) {
-                    await this.cloudinaryService.deleteImageProfilePhoto(publicId);
+                    await this.cloudinaryService.deleteImageProfilePhoto(profileFolder, publicId);
                 }
             }
 
-
-            const uploadResult = await this.cloudinaryService.uploadImageProfilePhoto(photo);
+            const uploadResult = await this.cloudinaryService.uploadImageProfilePhoto(profileFolder, photo);
             
             const userDto = new ActUserDto();
             userDto.ac_profilePhoto = uploadResult.secure_url;

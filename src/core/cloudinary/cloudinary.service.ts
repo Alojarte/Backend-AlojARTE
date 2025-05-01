@@ -10,10 +10,10 @@ export class CloudinaryService {
         private readonly configService:ConfigService
     ){}
 
-    async uploadImageProfilePhoto(file:Express.Multer.File):Promise<UploadApiResponse | UploadApiErrorResponse>{
+    async uploadImageProfilePhoto(folder:string, file:Express.Multer.File):Promise<UploadApiResponse | UploadApiErrorResponse>{
         return new Promise((resolve,reject)=>{
             const upload=cloudinary.uploader.upload_stream(
-                {folder:this.configService.get<string>(FOLDER_PROFILE)},
+                {folder:folder},
                 (error,result)=>{
                     if(error) return reject(error);
                     resolve(result!);
@@ -24,8 +24,7 @@ export class CloudinaryService {
         })
     }
 
-    async deleteImageProfilePhoto(publicId:string):Promise<any>{
-        const folder=this.configService.get<string>(FOLDER_PROFILE);
+    async deleteImageProfilePhoto(folder:string,publicId:string):Promise<any>{
         const publicIda=folder+'/'+publicId;
         console.log('eliminando imagen con publicId :'+publicId)
         console.log('publicIdReal :'+publicIda)

@@ -15,7 +15,7 @@ export class Hotel{
     address:string;
 
     @Column({type:'text', nullable:true})
-    description:string;
+    description:string | null;
 
     @Column({type:'varchar', nullable:false})
     nit:string;
