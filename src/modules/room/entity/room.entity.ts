@@ -4,6 +4,7 @@ import { ReservationRoom } from "src/modules/reservationRoom/entity/reservationR
 import { RoomImage } from "src/modules/roomImage/entity/roomImage.entity";
 import { RoomType } from "src/modules/typeRoom/entity/typeRoom.entity";
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { RoomStatusEnum } from "../dto/enumRoomState";
 
 @Entity('room')
 export class Room{
@@ -19,8 +20,8 @@ export class Room{
     @Column({type:'int', nullable:false})
     capacity:number;
 
-    @Column({type:'enum' , enum:['available','unavailable'], default:'available'})
-    status:string;
+    @Column({type:'enum' , enum:RoomStatusEnum, default:'available'})
+    status:RoomStatusEnum;
 
     @ManyToOne(()=>RoomType,(typeRoom)=>typeRoom.room, {onDelete:'CASCADE', onUpdate:'CASCADE',   })
     typeRoom:RoomType;  

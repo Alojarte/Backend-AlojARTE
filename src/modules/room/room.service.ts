@@ -9,6 +9,7 @@ import { UpdateRoomDto } from './dto/update.dto';
 import { TyperoomService } from '../typeRoom/typeroom.service';
 import { HotelService } from '../hotel/hotel.service';
 import { FilterRoomDto } from './dto/filterRoom.dto';
+import { RoomStatusEnum } from './dto/enumRoomState';
 
 @Injectable()
 export class RoomService {
@@ -49,7 +50,8 @@ export class RoomService {
             const res=await this.roomRepository.findOne({
                 where:{
                     id:id
-                }
+                },
+                relations:['typeRoom',]
             });
             if(!res){
                 throw new NotFoundException({
@@ -261,5 +263,54 @@ export class RoomService {
         }
     }
     
+    async stateRoom():Promise<any>{
+        try {
+            const statuses = Object.values(RoomStatusEnum);
+            if(!statuses){
+                throw new NotFoundException({
+                    message:'no se encontraron los estados',
+                    status:404
+                })
+            }
+            return { statuses };
+        } catch (error) {
+            return error;
+        }
+    }
+
+    async updateState(id: number, state: string): Promise<any> {
+        try {
+            if(!id || !state){
+                throw new NotFoundException('algunos parametros no se recibieron correctamente')
+            }
+            const existRoom=await this.getRoomId(id);
+            if(!existRoom.id){
+                throw new NotFoundException({
+                    message:'no se encontro la habitacion',
+                    status:404
+                });
+            };
+
+            const exists = await this.stateRoom(); 
+    
+            const statuses = exists.statuses; 
+    
+            if (!statuses.includes(state)) {
+                throw new Error(`Estado inválido: ${state}. Debe ser uno de: ${statuses.join(', ')}`);
+            }
+            existRoom.status=state;
+
+            const updateRoom=await this.roomRepository.save(existRoom);
+            
+            
+    
+            return { 
+                message: 'Estado válido', state,
+                room:updateRoom
+            };
+        } catch (error) {
+            return error;
+        }
+    }
     
 }

@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { RoomStatusEnum } from "./enumRoomState";
 
 export class UpdateRoomDto{
   @IsString()
@@ -15,7 +16,7 @@ export class UpdateRoomDto{
   
     @IsString()
     @IsOptional()
-    up_status:string;
+    up_status:RoomStatusEnum;
 
     @IsNumber()
     @IsOptional()

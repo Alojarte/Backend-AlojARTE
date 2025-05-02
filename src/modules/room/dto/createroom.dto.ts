@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { RoomStatusEnum } from "./enumRoomState";
 
 export class CreateRoomDto{
   @IsString()
@@ -15,7 +16,7 @@ export class CreateRoomDto{
   
     @IsString()
     @IsNotEmpty()
-    c_status:string;
+    c_status:RoomStatusEnum;
 
     @IsNumber()
     @IsNotEmpty()
