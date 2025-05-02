@@ -21,7 +21,7 @@ export class RoomimageService {
 
     async getAllImagesRooms():Promise<RoomImage[] | MessageDto>{
         try {
-            const image= await this.roomImageRepository.find();
+            const image= await this.roomImageRepository.find({relations:['room']});
             if(image.length==0){
                 throw new NotFoundException({
                     message:'no se encontraron imagenes de habitaciones en el sistema',
