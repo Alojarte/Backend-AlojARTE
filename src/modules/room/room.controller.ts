@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/createroom.dto';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
@@ -45,9 +45,19 @@ export class RoomController {
         return this.roomService.deleteRoom(id);
     }
 
+    @Get('/status/room')
+    async getStatusRooms():Promise<any>{
+        return  this.roomService.stateRoom();
+    }
+
     @Get('/filter/state')
     async filterRooms(@Body() filter:FilterRoomDto):Promise<any>{
         console.log('filtrando')
         return this.roomService.getRoomWithFilters(filter);
+    }
+
+    @Patch(':id')
+    async updateStateRoom(@Param('id') id:number, @Body()body:{status:string}):Promise<any>{
+        return this.roomService.updateState(id, body.status);
     }
 }
