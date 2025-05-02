@@ -25,7 +25,7 @@ export class HotelService {
         
     }
 
-    async getHotelById(id:number):Promise<Hotel | {message:string}>{
+    async getHotelById(id:number):Promise<Hotel>{
         try {
             const res= await this.hotelRepository.findOne({
                 where:{
