@@ -12,6 +12,7 @@ import { RoomModule } from './modules/room/room.module';
 import { HotelModule } from './modules/hotel/hotel.module';
 import { HotelimageModule } from './modules/hotelImage/hotelimage.module';
 import { TyperoomModule } from './modules/typeRoom/typeroom.module';
+import { RoomimageModule } from './modules/roomImage/roomimage.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -40,7 +41,8 @@ import { TyperoomModule } from './modules/typeRoom/typeroom.module';
   RoomModule,
   HotelModule,
   HotelimageModule,
-  TyperoomModule,  
+  TyperoomModule,
+  RoomimageModule,  
 ],
   controllers: [AppController],
   providers: [AppService],

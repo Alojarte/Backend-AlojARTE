@@ -37,6 +37,8 @@ export class RoomController {
         return this.roomService.updateRoom(id,room);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     @Delete(':id')
     async deleteRoom(@Param('id')id:number):Promise<any>{
         return this.roomService.deleteRoom(id);
