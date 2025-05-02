@@ -17,7 +17,7 @@ export class HotelimageService {
 
         private readonly hotelService: HotelService,
         private readonly configservice:ConfigService,
-        private readonly cloudinarService:CloudinaryService
+        private readonly cloudinarService:CloudinaryService,
     ){}
 
     async getAllHotelImages():Promise<HotelImage[] | MessageDto>{
@@ -93,11 +93,13 @@ export class HotelimageService {
             if(!existshotel){
                 throw new NotFoundException('el hotel no existe porfavor verifica los datos')
             }
-
+            const hotel=await this.hotelService.getHotelById(id);
+            if(!hotel.id){
+                throw new NotFoundException('el hotel no existe en la base de datos')
+            }
             const uploadResult= await this.cloudinarService.uploadImageProfilePhoto(folder, photo);
             const secureUrl=uploadResult.secure_url;
-            const hotel=new Hotel;
-            hotel.id=id;
+
             const image=this.hotelImageRepository.create({
                 Hotel:hotel,
                 image:secureUrl

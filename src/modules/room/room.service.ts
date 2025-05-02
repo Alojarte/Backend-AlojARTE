@@ -7,13 +7,15 @@ import { RoomType } from '../typeRoom/entity/typeRoom.entity';
 import { Hotel } from '../hotel/entity/hotel.entity';
 import { UpdateRoomDto } from './dto/update.dto';
 import { TyperoomService } from '../typeRoom/typeroom.service';
+import { HotelService } from '../hotel/hotel.service';
 
 @Injectable()
 export class RoomService {
     constructor(
   @InjectRepository( Room )
    private readonly roomRepository: Repository<Room>,
-   private readonly typeRoomService: TyperoomService
+   private readonly typeRoomService: TyperoomService,
+   private readonly hotelService:HotelService
     ) {}
 
     async getRooms():Promise<any>{
@@ -76,11 +78,15 @@ export class RoomService {
                 status:400
             }
         }
-        const typeRoom=new RoomType();
-        typeRoom.id=room.c_typeRoom; 
+        const typeRoom=await this.typeRoomService.getTypeRoomId(room.c_typeRoom);
+        if(!typeRoom.id){
+            throw new NotFoundException('el tipo de habitacion no existe')
+        }
 
-        const hotel=new Hotel();
-        hotel.id=room.c_hotel;
+        const hotel=await this.hotelService.getHotelById(room.c_hotel);
+        if(!hotel.id){
+            throw new NotFoundException('el hotel no existe')
+        }
 
         const newRoom=await this.roomRepository.create(
             {
@@ -92,7 +98,16 @@ export class RoomService {
               hotel:hotel, 
             }
         )
-       return await this.roomRepository.save(newRoom)
+        
+       const saved=await this.roomRepository.save(newRoom)
+       const { hotel: { room: _, ...hotelWithoutRooms } = {}, ...roomData } = saved;
+
+            const result = {
+            ...roomData,
+            hotel: hotelWithoutRooms,
+            };
+
+            return result;
        } catch (error) {
         return error;
        }
@@ -117,8 +132,14 @@ export class RoomService {
             throw new NotFoundException("el numero de habitacion ya existe")
         }
         const tipoHabitacion= await this.typeRoomService.getTypeRoomId(room.up_typeRoom);
-        const hotel= new Hotel();
-        hotel.id=room.up_hotel;
+        if(!tipoHabitacion.id){
+            throw new NotFoundException('el tipo de habitacion no es valido');
+        }
+        const hotel= await this.hotelService.getHotelById(room.up_hotel);
+        console.log(hotel)
+        if(!hotel.id){
+            throw new NotFoundException('el hotel no existe')
+        }
 
         exist.capacity=room.up_capacity || exist.capacity;
         exist.price=room.up_price || exist.price;
@@ -126,8 +147,14 @@ export class RoomService {
         exist.number=room.up_number || exist.number;
         exist.typeRoom=tipoHabitacion.id || exist.typeRoom;
         exist.hotel=hotel || exist.hotel;
-        return await this.roomRepository.save(exist)
+        const saved= await this.roomRepository.save(exist)
+        const { hotel: { room: _, ...hotelWithoutRooms } = {}, ...roomData } = saved;
 
+            const result = {
+            ...roomData,
+            hotel: hotelWithoutRooms,
+            };
+            return result;
        } catch (error) {
         return error;
        }

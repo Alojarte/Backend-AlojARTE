@@ -7,6 +7,7 @@ import { Room } from '../room/entity/room.entity';
 import { CloudinaryService } from 'src/core/cloudinary/cloudinary.service';
 import { ConfigService } from '@nestjs/config';
 import { FOLDER_ROOM } from 'src/config/constants';
+import { RoomService } from '../room/room.service';
 
 @Injectable()
 export class RoomimageService {
@@ -14,7 +15,8 @@ export class RoomimageService {
         @InjectRepository(RoomImage)
         private readonly roomImageRepository:Repository<RoomImage>,
         private readonly cloudinaryService:CloudinaryService,
-        private readonly configService:ConfigService
+        private readonly configService:ConfigService,
+        private readonly roomService:RoomService
     ){}
 
     async getAllImagesRooms():Promise<RoomImage[] | MessageDto>{
@@ -92,14 +94,22 @@ export class RoomimageService {
                 });
             };
             console.log('folder ',folder)
-            const uploadImage=await this.cloudinaryService.uploadImageProfilePhoto(folder, photo);
+            const room=await this.roomService.getRoomId(id);
+            console.log(room);
+            if(!room.id){
+                throw new NotFoundException({
+                    message:'no se encontro la habitacion',
+                    status:404
+                });
+            }
+
+           const uploadImage=await this.cloudinaryService.uploadImageProfilePhoto(folder, photo);
             const url=uploadImage.secure_url;
             console.log('url : ',url);
-            const room=new Room();
-            room.id=id;
+           
             const create=this.roomImageRepository.create({
                 image:url,
-                room:room
+                room:room.id
             })
             return await this.roomImageRepository.save(create);
         } catch (error) {
