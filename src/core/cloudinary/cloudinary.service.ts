@@ -11,6 +11,7 @@ export class CloudinaryService {
     ){}
 
     async uploadImageProfilePhoto(folder:string, file:Express.Multer.File):Promise<UploadApiResponse | UploadApiErrorResponse>{
+        console.log('subiendo imagen a la carpeta :'+folder)
         return new Promise((resolve,reject)=>{
             const upload=cloudinary.uploader.upload_stream(
                 {folder:folder},
