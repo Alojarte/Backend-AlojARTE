@@ -3,26 +3,26 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 export class UpdateRoomDto{
   @IsString()
  @IsOptional()
-    number:string;
+    up_number:string;
   
     @IsNumber()
     @IsOptional()
-    price:number;
+    up_price:number;
 
     @IsNumber()
     @IsOptional()
-    capacity:number;
+    up_capacity:number;
   
     @IsString()
     @IsOptional()
-    status:string;
+    up_status:string;
 
     @IsNumber()
     @IsOptional()
-    typeRoom:number;  
+    up_typeRoom:number;  
 
     @IsNumber()
     @IsOptional()
-    hotel:number;
+    up_hotel:number;
     
 }
