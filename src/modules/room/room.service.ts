@@ -8,6 +8,7 @@ import { Hotel } from '../hotel/entity/hotel.entity';
 import { UpdateRoomDto } from './dto/update.dto';
 import { TyperoomService } from '../typeRoom/typeroom.service';
 import { HotelService } from '../hotel/hotel.service';
+import { FilterRoomDto } from './dto/filterRoom.dto';
 
 @Injectable()
 export class RoomService {
@@ -178,4 +179,87 @@ export class RoomService {
             return error;
         }
     }
+
+    async getRoomWithFilters(filter: FilterRoomDto): Promise<any> {
+        try {
+            if (!filter) {
+                throw new BadRequestException({
+                    message: 'No se encontraron los filtros',
+                    status: 400
+                });
+            }
+    
+            const {
+                f_typeRoomId,
+                f_hotel,
+                f_priceMAx,
+                f_priceMin,
+                f_capacityMax,
+                f_capacityMin,
+                f_priceOrder, //sera  'ASC' o 'DESC'
+                f_status
+            } = filter;
+    
+            const query = this.roomRepository.createQueryBuilder('room')
+                .leftJoinAndSelect('room.typeRoom', 'typeRoom')
+                .leftJoinAndSelect('room.hotel', 'hotel');
+    
+            if (f_typeRoomId) {
+                const typeRoom = await this.typeRoomService.getTypeRoomId(f_typeRoomId);
+                if (!typeRoom?.id) {
+                    throw new NotFoundException('El tipo de habitación no existe');
+                }
+                query.andWhere('typeRoom.id = :typeRoomId', { typeRoomId: f_typeRoomId });
+            }
+    
+            if (f_hotel) {
+                const hotel = await this.hotelService.getHotelById(f_hotel);
+                if (!hotel?.id) {
+                    throw new NotFoundException('El hotel no existe');
+                }
+                query.andWhere('hotel.id = :hotelId', { hotelId: f_hotel });
+            }
+    
+            if (f_priceMin) {
+                query.andWhere('room.price >= :priceMin', { priceMin: f_priceMin });
+            }
+    
+            if (f_priceMAx) {
+                query.andWhere('room.price <= :priceMax', { priceMax: f_priceMAx });
+            }
+    
+            if (f_capacityMin) {
+                query.andWhere('room.capacity >= :capacityMin', { capacityMin: f_capacityMin });
+            }
+    
+            if (f_capacityMax) {
+                query.andWhere('room.capacity <= :capacityMax', { capacityMax: f_capacityMax });
+            }
+            if (f_status) {
+                query.andWhere('room.status = :status', { status: f_status });
+            }
+    
+            if (f_priceOrder) {
+                query.orderBy('room.price', f_priceOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC');
+            }
+    
+            const rooms = await query.getMany();
+    
+            // Limpiar hotel.room para que no venga con habitaciones redundantes, objetos redundantes dentro de hotel
+            const result = rooms.map(room => {
+                const { hotel: { room: _, ...hotelWithoutRooms } = {}, ...roomData } = room;
+                return {
+                    ...roomData,
+                    hotel: hotelWithoutRooms,
+                };
+            });
+    
+            return result;
+    
+        } catch (error) {
+            return error;
+        }
+    }
+    
+    
 }

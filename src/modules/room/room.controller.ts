@@ -5,6 +5,7 @@ import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorators';
 import { UpdateRoomDto } from './dto/update.dto';
+import { FilterRoomDto } from './dto/filterRoom.dto';
 
 @Controller('room')
 export class RoomController {
@@ -42,5 +43,11 @@ export class RoomController {
     @Delete(':id')
     async deleteRoom(@Param('id')id:number):Promise<any>{
         return this.roomService.deleteRoom(id);
+    }
+
+    @Get('/filter/state')
+    async filterRooms(@Body() filter:FilterRoomDto):Promise<any>{
+        console.log('filtrando')
+        return this.roomService.getRoomWithFilters(filter);
     }
 }
