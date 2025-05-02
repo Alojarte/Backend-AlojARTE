@@ -11,6 +11,7 @@ import { CloudinaryModule } from './core/cloudinary/cloudinary.module';
 import { RoomModule } from './modules/room/room.module';
 import { HotelModule } from './modules/hotel/hotel.module';
 import { HotelimageModule } from './modules/hotelImage/hotelimage.module';
+import { TyperoomModule } from './modules/typeRoom/typeroom.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -38,7 +39,8 @@ import { HotelimageModule } from './modules/hotelImage/hotelimage.module';
   CloudinaryModule,
   RoomModule,
   HotelModule,
-  HotelimageModule,  
+  HotelimageModule,
+  TyperoomModule,  
 ],
   controllers: [AppController],
   providers: [AppService],
