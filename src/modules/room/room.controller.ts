@@ -56,6 +56,8 @@ export class RoomController {
         return this.roomService.getRoomWithFilters(filter);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     @Patch(':id')
     async updateStateRoom(@Param('id') id:number, @Body()body:{status:string}):Promise<any>{
         return this.roomService.updateState(id, body.status);
