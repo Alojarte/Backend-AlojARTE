@@ -35,4 +35,13 @@ export class ActUserDto{
     @IsString()
     act_password:string;
 
+    @IsOptional()
+    act_expiredMin:string | null;
+
+    @IsOptional()
+    act_dateSend:Date | null;
+
+    @IsOptional()
+    act_token:string | null;
+
 }

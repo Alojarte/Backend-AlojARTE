@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
@@ -9,6 +9,8 @@ import * as optpGenerator from 'otp-generator'
 import { ConfigService } from '@nestjs/config';
 import { ActUserDto } from './dto/actUser.dto';
 import { ActPeopleDto } from '../people/dto/actPeople.dto';
+import { VerifyDto } from './dto/verifyData.dto';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -16,7 +18,8 @@ export class UserService {
         @InjectRepository(User)
         private readonly userRepository:Repository<User>,
 
-        private peopleService: PeopleService
+        private peopleService: PeopleService,
+
     ){}
 
     async createUser(createUserDto: CreateUserDto) {
@@ -55,6 +58,49 @@ export class UserService {
         const { password: _, ...userWithoutPassword } = user;
         return userWithoutPassword;
     }
+
+    async validateUserEmail(email:string):Promise<any>{
+
+        const emailSaneado=email.toLowerCase().trim();
+        email=emailSaneado;
+        
+        const user= await this.userRepository.findOne({
+            where:{
+                email:email
+            },
+           relations:['rol']
+        });
+
+        if(!user){
+            throw new UnauthorizedException('usuario no encontrado')
+        }
+
+        if(!user.verified){
+            throw new UnauthorizedException(' aun no se ha verificado la cuenta')
+        }
+        if(user.verificationCode.trim()!==""){
+            const currentDate = new Date();
+            const dateSend = user.dateSend ? new Date(user.dateSend) : null;
+            const expiredMin = Number(user.expiredMin);
+    
+            if (dateSend === null || isNaN(expiredMin)) {
+                throw new NotFoundException('No se han recibido los datos necesarios para verificar el usuario');
+            }
+    
+            const timeDiff = currentDate.getTime() - dateSend.getTime(); 
+            const maxAllowedDiff = expiredMin * 60 * 1000; 
+    
+            if (!(timeDiff > maxAllowedDiff)) {
+                throw new BadRequestException({
+                    message:'ya se ha enviado un codigo de verificacion, espera que expire e intenta nuevamente',
+                    statuss:400
+                })
+            }
+        }
+
+        return user;
+    }
+
 
 
 
@@ -96,22 +142,106 @@ export class UserService {
             },
             relations:['rol','people']
         })
-        console.log(userBd);
         if(!userBd){
             throw new NotFoundException('el usuario no existe')
         }
+        if(userBd.verified && !userBd.token && userBd.verificationCode.trim()==="" && !userBd.expiredMin  && !userBd.dateSend){
+            throw new UnauthorizedException('el usuario ya se encuentra verificado, por favor inicia sesion')
+        }
+        if(user.act_token && user.act_token?.trim()!==userBd.token?.trim()){
+            throw new NotFoundException('el token no coincide con el del usuario, verifica nuevmente')
+        }
 
-        if(user.act_codeVerify!==userBd?.verificationCode || userBd?.verificationCode.trim()==""){
+        if(user.act_codeVerify && user.act_codeVerify!==userBd?.verificationCode || userBd?.verificationCode.trim()==""){
             throw new UnauthorizedException('codigo erroneo intenta nuevamente')
         }
 
         if(!userBd){
             throw new NotFoundException('la categoria no ha sido encontrada')            
         }
+
+        const currentDate = new Date();
+        const dateSend = userBd.dateSend ? new Date(userBd.dateSend) : null;
+        const expiredMin = Number(userBd.expiredMin);
+
+        if (dateSend === null || isNaN(expiredMin)) {
+            throw new NotFoundException('No se han recibido los datos necesarios para verificar el usuario');
+        }
+
+        const timeDiff = currentDate.getTime() - dateSend.getTime(); 
+        const maxAllowedDiff = expiredMin * 60 * 1000; 
+
+        if (timeDiff > maxAllowedDiff) {
+            throw new BadRequestException({
+                message:'El tiempo de verificación ha expirado',
+                statuss:400,
+            });
+
+            //reeenviar email con datos para validacion
+        }
         userBd.verified=true;
         userBd.verificationCode='';
+        userBd.expiredMin=null;
+        userBd.dateSend=null;
+        userBd.token=null;
         return await this.userRepository.save(userBd);
         
+    }
+
+    async verifyUserById(id:number, email:string,  token:string):Promise<any>{
+        try {
+            if(!id || !email || !token){
+                throw new ForbiddenException('los datos no han sido recibidos correctamente')
+            }
+            const user=await this.userRepository.findOne({
+                where:{
+                    id:id
+                },
+                relations:['rol','people']
+            });
+
+            if(!user){
+                throw new NotFoundException('el usuario no se ha encontrado')
+            }
+            if(user.verified){
+                throw new UnauthorizedException('el usuario ya se encuentra verificado, por favor inicia sesion')
+            }
+            if(user.token?.trim()!==token.trim()){
+                throw new NotFoundException('el token no coincide con el del usuario,, verifica nuevamente');
+            }
+            const currentDate = new Date();
+            const dateSend = user.dateSend ? new Date(user.dateSend) : null;
+            const expiredMin = Number(user.expiredMin);
+            
+            if (dateSend === null || isNaN(expiredMin)) {
+                throw new NotFoundException('No se han recibido los datos necesarios para verificar el usuario');
+            }
+            
+            const timeDiff = currentDate.getTime() - dateSend.getTime(); 
+            const maxAllowedDiff = expiredMin * 60 * 1000; 
+            
+            if (timeDiff > maxAllowedDiff) {
+                throw new BadRequestException({
+                    message:'El tiempo de verificación ha expirado',
+                    statuss:400,
+                });
+
+                //reenviar email con datos actualizados
+            }
+
+            user.verified=true;
+            user.verificationCode='';
+            user.dateSend=null;
+            user.expiredMin=null;
+            user.token=null;
+            const userUpdate=await this.userRepository.save(user);
+            const { password: _,...userRestant } = userUpdate;
+
+            return userRestant;
+
+        } catch (error) {
+            return error;
+        }
     }
 
     async getUserById(id_rec:number){
@@ -204,6 +334,27 @@ export class UserService {
         } catch (error) {
             throw error;
         }
+    }
+
+    async verifyData(id:number, data:VerifyDto){
+        if(!id || !data){
+            throw new NotFoundException(' no se recibieron datos apra esta consulta')
+        }
+
+        const user=await this.userRepository.findOne({
+            where:{
+                id:id
+            }
+        });
+        if(!user){
+            throw new NotFoundException('el usuario no se ha encontrado')
+        }
+
+        user.dateSend=data.act_dateSend;
+        user.expiredMin=data.act_expiredMin;
+        user.verificationCode=data.act_verificationCode;
+        user.token=data.act_token;
+        return await this.userRepository.save(user);
     }
 
     async getUserEmail(email_rec:string){

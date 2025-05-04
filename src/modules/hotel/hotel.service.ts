@@ -12,13 +12,15 @@ export class HotelService {
         private readonly hotelRepository: Repository<Hotel>
     ){}
 
-    async getAllHotels():Promise<Hotel[]>{
+    async getAllHotels():Promise<any>{
         try {
             const res= await this.hotelRepository.find();
-            if(res.length>0){
-                return res;
+            if(res.length<1){
+                throw new NotFoundException('no hay hoteles registrados')
             }
-            throw new NotFoundException('no hay hoteles registrados')
+            const hotelesSinHabitaciones = res.map(({ room, ...rest }) => rest);
+            return hotelesSinHabitaciones;
+            
         } catch (error) {
             return error;
         }

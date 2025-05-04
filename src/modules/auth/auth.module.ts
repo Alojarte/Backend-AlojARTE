@@ -28,6 +28,7 @@ import { CloudinaryService } from 'src/core/cloudinary/cloudinary.service';
     TypeOrmModule.forFeature([Rol])
     ,UserModule, MailModule],
   controllers: [AuthController],
-  providers: [AuthService,jwtStrategy, CloudinaryService]
+  providers: [AuthService,jwtStrategy, CloudinaryService],
+  exports:[AuthService]
 })
 export class AuthModule {}
