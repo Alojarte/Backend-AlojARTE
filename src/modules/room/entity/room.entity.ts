@@ -20,7 +20,7 @@ export class Room{
     @Column({type:'int', nullable:false})
     capacity:number;
 
-    @Column({type:'enum' , enum:RoomStatusEnum, default:'available'})
+    @Column({type:'enum' , enum:RoomStatusEnum, default:'disponible'})
     status:RoomStatusEnum;
 
     @ManyToOne(()=>RoomType,(typeRoom)=>typeRoom.room, {onDelete:'CASCADE', onUpdate:'CASCADE',   })

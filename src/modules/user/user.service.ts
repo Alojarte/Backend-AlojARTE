@@ -11,6 +11,7 @@ import { ActUserDto } from './dto/actUser.dto';
 import { ActPeopleDto } from '../people/dto/actPeople.dto';
 import { VerifyDto } from './dto/verifyData.dto';
 import { AuthService } from '../auth/auth.service';
+import { Rol } from '../rol/entity/rol.entity';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,8 @@ export class UserService {
         private readonly userRepository:Repository<User>,
 
         private peopleService: PeopleService,
+        @InjectRepository(Rol)
+        private readonly rolRepository:Repository<Rol>
 
     ){}
 
@@ -32,6 +35,18 @@ export class UserService {
 
         if (existingUser) {
             throw new ConflictException('El email ya existe');
+        }
+
+        if(!createUserDto.cre_rol){
+            const rol=await this.rolRepository.findOne({
+                where:{
+                    name:'cliente'
+                }
+            });
+            if(!rol){
+                throw new NotFoundException(' el rol default no se ha encontrado en la base de datos')
+            }
+            createUserDto.cre_rol=rol?.id;
         }
 
         const peopleData = createUserDto.people;
@@ -48,7 +63,7 @@ export class UserService {
         const user = this.userRepository.create({
             email: createUserDto.cre_email,
             password: hashedPassword,
-            rol: { id: 1 },
+            rol: { id: createUserDto.cre_rol },
             people: people,
             profilePhoto: '',
             verificationCode: otp_code_veirfy,

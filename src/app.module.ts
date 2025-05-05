@@ -13,6 +13,8 @@ import { HotelModule } from './modules/hotel/hotel.module';
 import { HotelimageModule } from './modules/hotelImage/hotelimage.module';
 import { TyperoomModule } from './modules/typeRoom/typeroom.module';
 import { RoomimageModule } from './modules/roomImage/roomimage.module';
+import { RoleSeederService } from './config/sederservice/sederService';
+import { RoleSeederModule } from './config/sederservice/seeder.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -42,7 +44,8 @@ import { RoomimageModule } from './modules/roomImage/roomimage.module';
   HotelModule,
   HotelimageModule,
   TyperoomModule,
-  RoomimageModule,  
+  RoomimageModule,
+  RoleSeederModule  
 ],
   controllers: [AppController],
   providers: [AppService],
