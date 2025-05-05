@@ -50,9 +50,8 @@ export class RoomController {
         return  this.roomService.stateRoom();
     }
 
-    @Get('/filter/state')
+    @Post('/filter/state')
     async filterRooms(@Body() filter:FilterRoomDto):Promise<any>{
-        console.log('filtrando')
         return this.roomService.getRoomWithFilters(filter);
     }
 

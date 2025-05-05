@@ -255,6 +255,12 @@ export class RoomService {
                     hotel: hotelWithoutRooms,
                 };
             });
+            if(result.length === 0){
+                throw new NotFoundException({
+                    message:'no se encontraron habitaciones',
+                    status:404
+                })
+            }
     
             return result;
     
