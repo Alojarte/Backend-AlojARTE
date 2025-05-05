@@ -14,7 +14,7 @@ export class HotelController {
     ){}
 
     @Get()
-    async getAllHotels(){
+    async getAllHotels():Promise<any>{
         return await this.hoteService.getAllHotels()
     }
 

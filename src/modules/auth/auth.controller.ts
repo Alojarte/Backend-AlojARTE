@@ -3,9 +3,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/createUser.dto';
 import { ActUserDto } from '../user/dto/actUser.dto';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { promises } from 'dns';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +24,22 @@ export class AuthController {
     @Put('verify')
     async verifyAcount(@Body() user:ActUserDto){
         return await this.authService.verifyAcount(user);
+    }
+
+    @Put('verify/token')
+    async verifyWithToken(@Body() body:{token:string, }):Promise<any>{
+        try {
+            if(!body){
+                throw new NotFoundException('datos no recibidos')
+            }
+            if(!body.token){
+                throw new NotFoundException('token no valido');
+            }
+            const {email,sub,rol}=await this.jwtService.decode(body.token);
+            return await this.authService.verifyUserByToken(sub,email,body.token);
+        } catch (error) {
+            return error;
+        }
     }
 
     @Post('login')
@@ -55,12 +72,14 @@ export class AuthController {
 
     @Put('recoveryPassToken')
     async recoveryPassToken(@Body() body:{token:string, password:string}){
+        console.log('data redata ')
+        console.log(body)
         try {
             if(!body.token){
                 throw new NotFoundException('token no valido');
             }
-            const {email,sub,rol}=await this.jwtService.verifyAsync(body.token);
-            return await this.authService.verifyTokenRecovery(sub,body.password)
+            const {email,sub,rol}=await this.jwtService.decode(body.token);
+            return await this.authService.verifyTokenRecovery(sub,body.password, body.token,email);
         } catch (error) {
             throw error;
         }

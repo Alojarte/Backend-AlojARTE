@@ -29,8 +29,17 @@ export class User{
     @Column({ length: 10, type:'varchar' })
     verificationCode:string;
 
+    @Column({type:'varchar', nullable:true})
+    expiredMin:string | null;
+
+    @Column({type:'datetime', nullable:true})
+    dateSend:Date | null;
+
     @Column({type:'boolean', default:false})
     verified:boolean;
+
+    @Column({type:'varchar', nullable:true})
+    token:string | null;
 
     @OneToMany(()=>LogActivity,(logActivity)=>logActivity.user)
     log:LogActivity[];
