@@ -35,7 +35,7 @@ export class AuthController {
             if(!body.token){
                 throw new NotFoundException('token no valido');
             }
-            const {email,sub,rol}=await this.jwtService.decode(body.token);
+            const {email,sub,rol}=await this.jwtService.verifyAsync(body.token);
             return await this.authService.verifyUserByToken(sub,email,body.token);
         } catch (error) {
             return error;
@@ -78,7 +78,7 @@ export class AuthController {
             if(!body.token){
                 throw new NotFoundException('token no valido');
             }
-            const {email,sub,rol}=await this.jwtService.decode(body.token);
+            const {email,sub,rol}=await this.jwtService.verifyAsync(body.token);
             return await this.authService.verifyTokenRecovery(sub,body.password, body.token,email);
         } catch (error) {
             throw error;

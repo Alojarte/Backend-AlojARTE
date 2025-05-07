@@ -76,30 +76,14 @@ export class AuthService {
         try {
             const userCreated=await this.userService.createUser(user);
             const link =this.configService.get<string>(FRONT_URL_RECOVERY);
-            const token= await this.generateToken(userCreated);
-            console.log('token :')
-            console.log(token);
-            const linkVerify=link+'verify-account?token='+token.access_token;
+            if(!link){
+                await this.userService.deleteUser(userCreated.id);
+                throw new NotFoundException('no se ha podido enviar el correo, no se encontro la url de verificacion de contraseña');
+                
+            }
 
-
-            const userVerify=new VerifyDto();
-            userVerify.act_expiredMin="20";
-            userVerify.act_dateSend= new Date();
-            userVerify.act_token = token.access_token as string;
-            await this.userService.verifyData(userCreated.id,userVerify);
-
-            await this.mailService.sendMail(
-                userCreated.email,
-                'verificacion de cuenta',
-                'tu codigo de verificacion es : ',
-                {
-                    Codigo: userCreated.verificationCode,
-                    'expira en': '20 minutos',
-                    Usuario: userCreated.people.name,
-                    Message: 'Para verificar tu cuenta, haz clic en el siguiente enlace:',
-                    Link: linkVerify
-                },
-            )
+            await this.reSendEmail(userCreated.id,'VERIFICACION DE CUENTA',link);
+           
             return new MessageDto('usuario registrado se enviara un correo con su verificacion')
         } catch (error) {
             throw error;

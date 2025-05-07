@@ -12,6 +12,7 @@ import { ActPeopleDto } from '../people/dto/actPeople.dto';
 import { VerifyDto } from './dto/verifyData.dto';
 import { AuthService } from '../auth/auth.service';
 import { Rol } from '../rol/entity/rol.entity';
+import { MessageDto } from 'src/common/message.dto';
 
 @Injectable()
 export class UserService {
@@ -385,6 +386,26 @@ export class UserService {
         }
 
         return user;
+    }
+
+    async deleteUser(id:number){
+        try {
+             const user=await this.userRepository.findOne({
+            where:{
+                id:id
+            },
+            relations:['rol','people']
+            });
+            if(!user){
+                throw new NotFoundException('el usuario no se ha encontrado')
+            }
+            await this.peopleService.deletePeople(user.people.id);
+            await this.userRepository.delete(id);
+            return new MessageDto('usuario eliminado con exito')
+        } catch (error) {
+            throw error;
+        }
+       
     }
 
 }
