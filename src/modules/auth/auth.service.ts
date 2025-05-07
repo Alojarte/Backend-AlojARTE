@@ -37,7 +37,6 @@ export class AuthService {
                 throw new NotFoundException('el usuario no existe');
             }
             const token= await this.generateToken(userCreated);
-            //verificar estos parametros de token control acces de acuerdo a si er recovery o si es verify
             const linkVerify=url+token.access_token;
 
             const otp_code_veirfy = optpGenerator.generate(6, {
@@ -75,7 +74,7 @@ export class AuthService {
     async register(user:CreateUserDto):Promise<MessageDto>{
         try {
             const userCreated=await this.userService.createUser(user);
-            const link =this.configService.get<string>(FRONT_URL_RECOVERY);
+            const link =this.configService.get<string>(FRONT_URL_VERIFY);
             if(!link){
                 await this.userService.deleteUser(userCreated.id);
                 throw new NotFoundException('no se ha podido enviar el correo, no se encontro la url de verificacion de contraseña');
