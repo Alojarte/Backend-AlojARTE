@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Headers, NotFoundException, Post, Put, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Get, Headers, NotFoundException, Post, Put, UseGuards, UseInterceptors, UploadedFile, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/createUser.dto';
 import { ActUserDto } from '../user/dto/actUser.dto';
-import { JwtService, TokenExpiredError } from '@nestjs/jwt';
+import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { promises } from 'dns';
@@ -35,7 +35,17 @@ export class AuthController {
             if(!body.token){
                 throw new NotFoundException('token no valido');
             }
-            const {email,sub,rol}=await this.jwtService.verifyAsync(body.token);
+            const {email,sub,rol}=await this.jwtService.verifyAsync(body.token).then((data)=>{
+                return data;
+            },
+            (error)=>{
+                if(error instanceof TokenExpiredError){
+                    throw new BadRequestException('token expirado')
+                }else if(error instanceof JsonWebTokenError){
+                    throw new BadRequestException('token no valido')
+                }
+            }
+        );
             return await this.authService.verifyUserByToken(sub,email,body.token);
         } catch (error) {
             return error;
@@ -78,7 +88,17 @@ export class AuthController {
             if(!body.token){
                 throw new NotFoundException('token no valido');
             }
-            const {email,sub,rol}=await this.jwtService.verifyAsync(body.token);
+            const {email,sub,rol}=await this.jwtService.verifyAsync(body.token).then((data)=>{
+                return data;
+            },
+            (error)=>{
+                if(error instanceof TokenExpiredError){
+                    throw new BadRequestException('token expirado')
+                }else if(error instanceof JsonWebTokenError){
+                    throw new BadRequestException('token no valido')
+                }
+            }
+        );
             return await this.authService.verifyTokenRecovery(sub,body.password, body.token,email);
         } catch (error) {
             throw error;
@@ -90,7 +110,17 @@ export class AuthController {
     @Put('updateProfile')
     async updateProfile(@Body() user:ActUserDto, @Headers('authorization')authHeader:string){
         const token=authHeader?.replace('Bearer ','')
-        const {email,sub,rol}=await this.jwtService.verifyAsync(token);
+        const {email,sub,rol}=await this.jwtService.verifyAsync(token).then((data)=>{
+            return data;
+        },
+        (error)=>{
+            if(error instanceof TokenExpiredError){
+                throw new BadRequestException('token expirado')
+            }else if(error instanceof JsonWebTokenError){
+                throw new BadRequestException('token no valido')
+            }
+        }
+    );
         return await this.authService.updateProfile(sub,user)
     }
 
@@ -102,7 +132,17 @@ export class AuthController {
         if(!token) {
             throw new NotFoundException('Token no válido');
         }
-        const {email,sub,rol} = await this.jwtService.verifyAsync(token);
+        const {email,sub,rol} = await this.jwtService.verifyAsync(token).then((data)=>{
+            return data;
+        },
+        (error)=>{
+            if(error instanceof TokenExpiredError){
+                throw new BadRequestException('token expirado')
+            }else if(error instanceof JsonWebTokenError){
+                throw new BadRequestException('token no valido')
+            }
+        }
+    );
         return await this.authService.updateProfilePhoto(sub, photo);
     }
 }
