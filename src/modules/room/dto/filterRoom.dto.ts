@@ -7,6 +7,10 @@ export class FilterRoomDto{
     f_typeRoomId:number;
 
     @IsOptional()
+    @IsString()
+    f_number:string;
+
+    @IsOptional()
     @IsNumber()
     f_hotel:number;
 

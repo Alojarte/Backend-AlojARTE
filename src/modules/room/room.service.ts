@@ -199,7 +199,8 @@ export class RoomService {
                 f_capacityMax,
                 f_capacityMin,
                 f_priceOrder, //sera  'ASC' o 'DESC'
-                f_status
+                f_status,
+                f_number
             } = filter;
     
             const query = this.roomRepository.createQueryBuilder('room')
@@ -241,9 +242,13 @@ export class RoomService {
                 query.andWhere('room.status = :status', { status: f_status });
             }
     
+            if(f_number){
+                query.andWhere('room.number =:number',{number:f_number})
+            }
             if (f_priceOrder) {
                 query.orderBy('room.price', f_priceOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC');
             }
+            
     
             const rooms = await query.getMany();
     
@@ -255,6 +260,12 @@ export class RoomService {
                     hotel: hotelWithoutRooms,
                 };
             });
+            if(result.length === 0){
+                throw new NotFoundException({
+                    message:'no se encontraron habitaciones',
+                    status:404
+                })
+            }
     
             return result;
     

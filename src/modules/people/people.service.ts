@@ -4,6 +4,7 @@ import { People } from './entity/people.entity';
 import { Repository } from 'typeorm';
 import { CreatePeopleDto } from './dto/createPeople.dto';
 import { ActPeopleDto } from './dto/actPeople.dto';
+import { MessageDto } from 'src/common/message.dto';
 
 @Injectable()
 export class PeopleService {
@@ -62,4 +63,22 @@ export class PeopleService {
             return error;
         }
     }
+
+    async deletePeople(id:number){
+        try {
+            const people = await this.peopleRepositoy.findOne({
+            where:{
+                id:id
+                }
+                });
+             if(!people){
+                   return null;
+             }
+             await this.peopleRepositoy.delete(id);
+             return new MessageDto('persona eliminada con exito')
+        } catch (error) {
+            throw error;
+        }
+    }
+        
 }

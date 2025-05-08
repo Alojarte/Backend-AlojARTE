@@ -10,7 +10,7 @@ export class CreateUserDto{
     @IsString()
     cre_email:string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsNumber()
     cre_rol:number;
 

@@ -10,56 +10,55 @@ import { FilterRoomDto } from './dto/filterRoom.dto';
 @Controller('room')
 export class RoomController {
     constructor(
-        private readonly roomService:RoomService
-    ){}
+        private readonly roomService: RoomService
+    ) { }
 
 
     @Get()
-    async getAllRoom():Promise<any>{
+    async getAllRoom(): Promise<any> {
         return this.roomService.getRooms();
     }
 
     @Get(':id')
-    async getRoomById(@Param('id')id:number):Promise<any>{
+    async getRoomById(@Param('id') id: number): Promise<any> {
         return this.roomService.getRoomId(id);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('admin')
-   @Post() 
-   async createRoom(@Body() user:CreateRoomDto ):Promise<any>{
-       return this.roomService.createRoom(user);
-   }
+    @Post()
+    async createRoom(@Body() user: CreateRoomDto): Promise<any> {
+        return this.roomService.createRoom(user);
+    }
 
-   @UseGuards(JwtAuthGuard,RolesGuard)
-   @Roles('admin')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     @Put(":id")
-    async updateRoom(@Body() room:UpdateRoomDto, @Param('id')id:number):Promise<any>{
-        return this.roomService.updateRoom(id,room);
+    async updateRoom(@Body() room: UpdateRoomDto, @Param('id') id: number): Promise<any> {
+        return this.roomService.updateRoom(id, room);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Delete(':id')
-    async deleteRoom(@Param('id')id:number):Promise<any>{
+    async deleteRoom(@Param('id') id: number): Promise<any> {
         return this.roomService.deleteRoom(id);
     }
 
     @Get('/status/room')
-    async getStatusRooms():Promise<any>{
-        return  this.roomService.stateRoom();
+    async getStatusRooms(): Promise<any> {
+        return this.roomService.stateRoom();
     }
 
-    @Get('/filter/state')
-    async filterRooms(@Body() filter:FilterRoomDto):Promise<any>{
-        console.log('filtrando')
+    @Post('/filter/state')
+    async filterRooms(@Body() filter: FilterRoomDto): Promise<any> {
         return this.roomService.getRoomWithFilters(filter);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('admin')
     @Patch(':id')
-    async updateStateRoom(@Param('id') id:number, @Body()body:{status:string}):Promise<any>{
+    async updateStateRoom(@Param('id') id: number, @Body() body: { status: string }): Promise<any> {
         return this.roomService.updateState(id, body.status);
     }
 }

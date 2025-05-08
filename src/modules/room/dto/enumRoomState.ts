@@ -1,6 +1,8 @@
 export enum RoomStatusEnum {
-    AVAILABLE = 'available',
-    UNAVAILABLE = 'unavailable',
-    MAINTENANCE = 'maintenance'
+  LIMPIEZA='limpieza',
+  DISPONIBLE='disponible',
+  OCUPADO='ocupado',
+  MANTENIMIENTO='mantenimiento',
+  RESERVADO='reservado'
   }
   
