@@ -37,7 +37,6 @@ export class AuthService {
                 throw new NotFoundException('el usuario no existe');
             }
             const token= await this.generateToken(userCreated);
-            //verificar estos parametros de token control acces de acuerdo a si er recovery o si es verify
             const linkVerify=url+token.access_token;
 
             const otp_code_veirfy = optpGenerator.generate(6, {
@@ -75,31 +74,15 @@ export class AuthService {
     async register(user:CreateUserDto):Promise<MessageDto>{
         try {
             const userCreated=await this.userService.createUser(user);
-            const link =this.configService.get<string>(FRONT_URL_RECOVERY);
-            const token= await this.generateToken(userCreated);
-            console.log('token :')
-            console.log(token);
-            const linkVerify=link+'verify-account?token='+token.access_token;
+            const link =this.configService.get<string>(FRONT_URL_VERIFY);
+            if(!link){
+                await this.userService.deleteUser(userCreated.id);
+                throw new NotFoundException('no se ha podido enviar el correo, no se encontro la url de verificacion de contraseña');
+                
+            }
 
-
-            const userVerify=new VerifyDto();
-            userVerify.act_expiredMin="20";
-            userVerify.act_dateSend= new Date();
-            userVerify.act_token = token.access_token as string;
-            await this.userService.verifyData(userCreated.id,userVerify);
-
-            await this.mailService.sendMail(
-                userCreated.email,
-                'verificacion de cuenta',
-                'tu codigo de verificacion es : ',
-                {
-                    Codigo: userCreated.verificationCode,
-                    'expira en': '20 minutos',
-                    Usuario: userCreated.people.name,
-                    Message: 'Para verificar tu cuenta, haz clic en el siguiente enlace:',
-                    Link: linkVerify
-                },
-            )
+            await this.reSendEmail(userCreated.id,'VERIFICACION DE CUENTA',link);
+           
             return new MessageDto('usuario registrado se enviara un correo con su verificacion')
         } catch (error) {
             throw error;
