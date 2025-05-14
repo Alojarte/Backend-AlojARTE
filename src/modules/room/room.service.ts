@@ -188,7 +188,6 @@ export class RoomService {
                     status:404
                 })
             };
-            console.log(exist)
 
             const statusReservado=await this.statusRoomService.getStatusByName('reservado');
             const statusOcupado=await this.statusRoomService.getStatusByName('ocupado');
