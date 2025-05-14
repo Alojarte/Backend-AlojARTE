@@ -36,5 +36,5 @@ export class FilterRoomDto{
 
     @IsOptional()
     @IsNumber()
-    f_status:string;
+    f_status:number;
 }

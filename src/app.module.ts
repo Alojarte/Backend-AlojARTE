@@ -15,6 +15,7 @@ import { TyperoomModule } from './modules/typeRoom/typeroom.module';
 import { RoomimageModule } from './modules/roomImage/roomimage.module';
 import { RoleSeederService } from './config/sederservice/sederService';
 import { RoleSeederModule } from './config/sederservice/seeder.module';
+import { StatusroomModule } from './modules/statusroom/statusroom.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -45,7 +46,8 @@ import { RoleSeederModule } from './config/sederservice/seeder.module';
   HotelimageModule,
   TyperoomModule,
   RoomimageModule,
-  RoleSeederModule  
+  RoleSeederModule,
+  StatusroomModule  
 ],
   controllers: [AppController],
   providers: [AppService],
