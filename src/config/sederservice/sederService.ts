@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Rol as Role } from 'src/modules/rol/entity/rol.entity';
 import { TypeDni } from 'src/modules/typeDni/entity/typeDni.entity';
 import { RoomType } from 'src/modules/typeRoom/entity/typeRoom.entity';
+import { RoomStatusEntity } from 'src/modules/statusroom/entity/roomstatus.entity';
 
 @Injectable()
 export class RoleSeederService implements OnModuleInit {
@@ -15,7 +16,10 @@ export class RoleSeederService implements OnModuleInit {
     private readonly typeDniRepository:Repository<TypeDni>,
 
     @InjectRepository(RoomType)
-    private readonly roomtTypeRepository:Repository<RoomType>
+    private readonly roomtTypeRepository:Repository<RoomType>,
+
+    @InjectRepository(RoomStatusEntity)
+    private readonly roomStatusRepository:Repository<RoomStatusEntity>
   ) {}
 
   async onModuleInit() {
@@ -49,6 +53,18 @@ export class RoleSeederService implements OnModuleInit {
         {type:'suite'},
       ]);
       console.log('Tipos de habitaciones iniciales creados ✅');
+    }
+
+    const countRoomStatus=await this.roomStatusRepository.count();
+    if(countRoomStatus===0){
+      await this.roomStatusRepository.save([
+        {status:'disponible'},
+        {status:'ocupado'},
+        {status:'reservado'},
+        {status:'limpieza'},
+        {status:'mantenimiento'},
+      ]);
+      console.log('Status de habitaciones iniciales creados ✅');
     }
   }
   

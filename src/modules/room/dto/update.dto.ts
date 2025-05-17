@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-import { RoomStatusEnum } from "./enumRoomState";
+import { RoomStatusEntity } from "src/modules/statusroom/entity/roomstatus.entity";
 
 export class UpdateRoomDto{
   @IsString()
@@ -16,7 +16,7 @@ export class UpdateRoomDto{
   
     @IsString()
     @IsOptional()
-    up_status:RoomStatusEnum;
+    up_status:RoomStatusEntity;
 
     @IsNumber()
     @IsOptional()

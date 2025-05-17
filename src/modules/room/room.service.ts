@@ -8,8 +8,8 @@ import { Hotel } from '../hotel/entity/hotel.entity';
 import { UpdateRoomDto } from './dto/update.dto';
 import { TyperoomService } from '../typeRoom/typeroom.service';
 import { HotelService } from '../hotel/hotel.service';
-import { FilterRoomDto } from './dto/filterRoom.dto';
-import { RoomStatusEnum } from './dto/enumRoomState';
+import { FilterRoomDto } from './dto/filterRoom.dto'; 
+import { StatusroomService } from '../statusroom/statusroom.service';
 
 @Injectable()
 export class RoomService {
@@ -17,7 +17,8 @@ export class RoomService {
   @InjectRepository( Room )
    private readonly roomRepository: Repository<Room>,
    private readonly typeRoomService: TyperoomService,
-   private readonly hotelService:HotelService
+   private readonly hotelService:HotelService,
+   private readonly statusRoomService:StatusroomService,
     ) {}
 
     async getRooms():Promise<any>{
@@ -91,6 +92,7 @@ export class RoomService {
             throw new NotFoundException('el hotel no existe')
         }
 
+
         const newRoom=await this.roomRepository.create(
             {
               number:room.c_number,
@@ -101,6 +103,15 @@ export class RoomService {
               hotel:hotel, 
             }
         )
+        if(!newRoom.status){
+            newRoom.status=await this.statusRoomService.getStatusByName('disponible');
+            if(!newRoom.status){
+                throw new BadRequestException({
+                    message:'no se encontro el estado default porfavor ingrese uno manualmente',
+                    status:404
+                })
+            }
+        }
         
        const saved=await this.roomRepository.save(newRoom)
        const { hotel: { room: _, ...hotelWithoutRooms } = {}, ...roomData } = saved;
@@ -165,13 +176,28 @@ export class RoomService {
 
     async deleteRoom(id:number):Promise<any>{
         try {
-            const exist=await this.roomRepository.findOneBy({id:id});
+            const exist=await this.roomRepository.findOne({
+                where:{
+                    id:id
+                },
+                relations:['status']
+            });
             if(!exist){
                 throw new NotFoundException({
                     message:'no se encontro la habitacion',
                     status:404
                 })
             };
+
+            const statusReservado=await this.statusRoomService.getStatusByName('reservado');
+            const statusOcupado=await this.statusRoomService.getStatusByName('ocupado');
+            if(exist.status.id==statusReservado.id || exist.status.id==statusOcupado.id){
+                throw new BadRequestException({
+                    message:'no se puede eliminar la habitacion porque esta reservada o ocupada',
+                    status:400
+                })
+            }
+            
             await this.roomRepository.delete(id);
             return{
                 message:`la habitacion con ${id} fue eliminada correctamente`,
@@ -205,7 +231,8 @@ export class RoomService {
     
             const query = this.roomRepository.createQueryBuilder('room')
                 .leftJoinAndSelect('room.typeRoom', 'typeRoom')
-                .leftJoinAndSelect('room.hotel', 'hotel');
+                .leftJoinAndSelect('room.hotel', 'hotel')
+                .leftJoinAndSelect('room.status', 'roomstatus');
     
             if (f_typeRoomId) {
                 const typeRoom = await this.typeRoomService.getTypeRoomId(f_typeRoomId);
@@ -239,7 +266,7 @@ export class RoomService {
                 query.andWhere('room.capacity <= :capacityMax', { capacityMax: f_capacityMax });
             }
             if (f_status) {
-                query.andWhere('room.status = :status', { status: f_status });
+                query.andWhere('roomstatus.id = :status', { status: f_status });
             }
     
             if(f_number){
@@ -251,8 +278,7 @@ export class RoomService {
             
     
             const rooms = await query.getMany();
-    
-            // Limpiar hotel.room para que no venga con habitaciones redundantes, objetos redundantes dentro de hotel
+            
             const result = rooms.map(room => {
                 const { hotel: { room: _, ...hotelWithoutRooms } = {}, ...roomData } = room;
                 return {
@@ -276,14 +302,8 @@ export class RoomService {
     
     async stateRoom():Promise<any>{
         try {
-            const statuses = Object.values(RoomStatusEnum);
-            if(!statuses){
-                throw new NotFoundException({
-                    message:'no se encontraron los estados',
-                    status:404
-                })
-            }
-            return { statuses };
+            const statuses = await this.statusRoomService.getAllRoomStatus();
+            return statuses ;
         } catch (error) {
             return error;
         }
