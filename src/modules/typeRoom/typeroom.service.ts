@@ -27,9 +27,7 @@ export class TyperoomService {
     async getTypeRoomId(id:number):Promise<any>{
         try {
             
-            const type=await this.typeRoomRepository.findOne({
-                where:{id:id},
-            });
+            const type=await this.typeRoomRepository.findOneBy({id:id});
            
             if(!type){
                 throw new NotFoundException(' no se encontro el tipo de habitacion')
