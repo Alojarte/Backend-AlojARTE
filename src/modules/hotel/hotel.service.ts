@@ -29,11 +29,7 @@ export class HotelService {
 
     async getHotelById(id:number):Promise<Hotel>{
         try {
-            const res= await this.hotelRepository.findOne({
-                where:{
-                    id:id
-                }
-            });
+            const res= await this.hotelRepository.findOneBy({id:id});
             if(!res){
                 throw new NotFoundException('hotel no encontrado');
             }
