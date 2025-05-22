@@ -16,6 +16,11 @@ import { RoomimageModule } from './modules/roomImage/roomimage.module';
 import { RoleSeederService } from './config/sederservice/sederService';
 import { RoleSeederModule } from './config/sederservice/seeder.module';
 import { StatusroomModule } from './modules/statusroom/statusroom.module';
+import { ReservationModule } from './modules/reservation/reservation.module';
+import { ReservationroomModule } from './modules/reservationRoom/reservationroom.module';
+import { PaymentstatusModule } from './modules/paymentStatus/paymentstatus.module';
+import { PaymentModule } from './modules/payment/payment.module';
+import { AvalaiblesmethodModule } from './modules/avalaiblesMethod/avalaiblesmethod.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -33,7 +38,7 @@ import { StatusroomModule } from './modules/statusroom/statusroom.module';
       database: configService.get(DB_DATABASE),
       entities: [__dirname+'/**/*.entity{.ts,.js}'],
       synchronize:true,
-      logging:true,
+      logging:false,
     }),
     inject:[ConfigService]
   }),
@@ -47,9 +52,14 @@ import { StatusroomModule } from './modules/statusroom/statusroom.module';
   TyperoomModule,
   RoomimageModule,
   RoleSeederModule,
-  StatusroomModule  
+  StatusroomModule,
+  ReservationModule,
+  ReservationroomModule,
+  PaymentstatusModule,
+  PaymentModule,
+  AvalaiblesmethodModule  
 ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,],
 })
 export class AppModule {}

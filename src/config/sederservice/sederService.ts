@@ -5,6 +5,8 @@ import { Rol as Role } from 'src/modules/rol/entity/rol.entity';
 import { TypeDni } from 'src/modules/typeDni/entity/typeDni.entity';
 import { RoomType } from 'src/modules/typeRoom/entity/typeRoom.entity';
 import { RoomStatusEntity } from 'src/modules/statusroom/entity/roomstatus.entity';
+import { PaymentStatus } from 'src/modules/paymentStatus/entity/paymentStatus.entity';
+import { AvalaibleMethod } from 'src/modules/avalaiblesMethod/entity/avalaiblesmethod.entity';
 
 @Injectable()
 export class RoleSeederService implements OnModuleInit {
@@ -19,7 +21,11 @@ export class RoleSeederService implements OnModuleInit {
     private readonly roomtTypeRepository:Repository<RoomType>,
 
     @InjectRepository(RoomStatusEntity)
-    private readonly roomStatusRepository:Repository<RoomStatusEntity>
+    private readonly roomStatusRepository:Repository<RoomStatusEntity>,
+    @InjectRepository(PaymentStatus)
+    private readonly paymentStatusRepository:Repository<PaymentStatus>,
+    @InjectRepository(AvalaibleMethod)
+    private readonly avalaibleMethodRepository:Repository<AvalaibleMethod>,
   ) {}
 
   async onModuleInit() {
@@ -66,6 +72,31 @@ export class RoleSeederService implements OnModuleInit {
       ]);
       console.log('Status de habitaciones iniciales creados ✅');
     }
+
+      const countPaymentStatus=await this.paymentStatusRepository.count();
+      if(countPaymentStatus===0){
+        await this.paymentStatusRepository.save([
+          {status:'pendiente'},
+          {status:'pagado'},
+          {status:'cancelado'},
+          {status:'fallido'}
+        ]);
+        console.log('Status de pagos iniciales creados ✅');
+      }
+
+      const countAvalaibleMethod=await this.avalaibleMethodRepository.count();
+      if(countAvalaibleMethod===0){
+        await this.avalaibleMethodRepository.save([
+          {name:'ninguno'},
+          {name:'efectivo'},
+          {name:'tarjeta'},
+          {name:'transferencia'},
+          {name:'deposito'},
+        ]);
+        console.log('Metodos de pago iniciales creados ✅');
+      }
   }
+
+
   
 }
